@@ -1,33 +1,189 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
+# --------------------------
+# Java / Maven
+# --------------------------
+/target/
+!.mvn/wrapper/maven-wrapper.jar
 .project
-.settings
-.springBeans
-.sts4-cache
+.classpath
+.settings/
+.factorypath
+dependency-reduced-pom.xml
+release.properties
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+buildNumber.properties
+.mvn/timing.properties
 
-### IntelliJ IDEA ###
-.idea
-*.iws
+# compiled class files
+**/*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# Eclipse specific
+.metadata/
+bin/
+tmp/
+
+# --------------------------
+# IntelliJ / JetBrains
+# --------------------------
+.idea/
 *.iml
-*.ipr
+*.iws
+out/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+# --------------------------
+# VS Code
+# --------------------------
 .vscode/
+.history/
+
+# --------------------------
+# OS files
+# --------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.nfs*
+
+# --------------------------
+# Logs, temp, runtime
+# --------------------------
+logs/
+*.log
+*.log.*
+hs_err_pid*
+crash.log
+java_pid*.log
+nohup.out
+
+# Temporary files
+temp/
+*.tmp
+*.swp
+*.swo
+
+# --------------------------
+# Environment / Secrets / Keys
+# --------------------------
+.env
+.env.local
+.env.*.local
+*.env
+secrets/
+credentials/
+*.jks
+*.keystore
+*.p12
+*.pem
+*.crt
+*.key
+credentials.json
+aws-credentials
+gcloud-service-key.json
+
+# --------------------------
+# Docker
+# --------------------------
+# ignore local container data (not compose files)
+docker-compose.override.yml
+docker-compose.local.yml
+**/docker-compose.override.yml
+**/docker-compose.local.yml
+
+# If you build tarballs / images locally
+*.tar
+*.tar.gz
+docker-image-*.tar
+
+# Named docker volume mounts (if mapping to host path)
+pgdata/
+postgres-data/
+mysql-data/
+
+# --------------------------
+# Test / coverage / reports
+# --------------------------
+/coverage/
+jacoco.exec
+*.lcov
+.target/
+test-output/
+surefire-reports/
+failsafe-reports/
+html-report/
+reports/
+
+# Sonar / scanner
+.scannerwork/
+
+# --------------------------
+# IDE / Tools
+# --------------------------
+.sublime-workspace
+.sublime-project
+
+# Gradle (just in case)
+.gradle/
+build/
+
+# Node (if frontend appears later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp.*
+.pnp.js
+
+# --------------------------
+# Generated native images / executables
+# --------------------------
+*.exe
+*.dll
+*.so
+*.dylib
+
+# --------------------------
+# Temporary / OS editor files
+# --------------------------
+*.bak
+*.orig
+*.old
+*~.nib
+
+# --------------------------
+# Misc
+# --------------------------
+# Jetty, Tomcat temp
+work/
+wtpwebapps/
+
+# IntelliJ run configs that you don't want to share
+.idea/runConfigurations/
+
+# Local development artifacts
+local.env
+local-*.yml
+.env.backup
+
+# --------------------------
+# Notes
+# --------------------------
+# - No ignores for: src/, Dockerfile, docker-compose.yml, src/main/resources/db/migration (Flyway),
+#   src/main/resources/graphql, .github/ (CI), README.md, pom.xml, mvnw, .mvn/.
+# - Add any additional secret/config files you use (e.g. keystores or provider keys).
+# - For CI, store secrets in GitHub/GitLab CI secret store rather than in files committed to the repo.
