@@ -1,0 +1,11 @@
+target/
+.idea/
+.vscode/
+*.iml
+*.log
+.DS_Store
+.git
+.gitignore
+docker-compose.override.yml
+.env
+node_modules/

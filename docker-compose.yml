@@ -1,8 +1,6 @@
-version: "3.8"
-
 services:
   postgres:
-    image: postgres:15
+    image: postgres:17
     container_name: citas_postgres
     env_file:
       - .env
@@ -21,7 +19,7 @@ services:
       retries: 5
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:4-management
     container_name: citas_rabbitmq
     ports:
       - "${RABBITMQ_PORT_AMQP:-5672}:5672"
@@ -68,8 +66,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    volumes:
-      - ./:/app:cached
+    #volumes:
+    # - ./:/app:cached
     command: ["sh", "-c", "mvn -DskipTests package && java -jar target/*.jar"]
     restart: on-failure
 
