@@ -26,4 +26,5 @@ WORKDIR /app
 COPY --from=build /workspace/target/*.jar app.jar
 
 # Render fija el puerto en la env var PORT
-CMD ["sh","-c","java -Dserver.port=${PORT} -jar app.jar"]
+CMD ["sh","-c","java -Djava.net.preferIPv4Stack=true -Dserver.port=${PORT} -jar app.jar"]
+
