@@ -6,6 +6,8 @@ import com.citasalud.agendamiento.infrastructure.out.persistence.entity.Appointm
 import com.citasalud.agendamiento.infrastructure.out.persistence.mapper.AppointmentMapper;
 import com.citasalud.agendamiento.infrastructure.out.persistence.repository.SpringDataJpaAppointmentRepository;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,5 +34,13 @@ public class JpaAppointmentRepositoryAdapter implements AppointmentRepositoryPor
         // Mapeamos la Entidad encontrada al Modelo de Dominio
         return repository.findById(appointmentId)
                 .map(mapper::toDomainModel);
+    }
+
+    @Override
+    public List<Appointment> findAllByAffiliateId(UUID affiliateId) {
+        return repository.findAllByAffiliateId(affiliateId)
+                .stream()
+                .map(mapper::toDomainModel)
+                .toList();
     }
 }
