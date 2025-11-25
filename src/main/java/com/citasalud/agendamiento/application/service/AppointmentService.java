@@ -1,7 +1,6 @@
 package com.citasalud.agendamiento.application.service;
 
 import com.citasalud.agendamiento.domain.ports.in.CancelAppointmentUseCase;
-import java.time.OffsetDateTime;
 import com.citasalud.agendamiento.domain.exception.*;
 import com.citasalud.agendamiento.domain.model.User;
 import com.citasalud.agendamiento.domain.ports.in.ModifyAppointmentUseCase;
@@ -15,117 +14,139 @@ import com.citasalud.agendamiento.domain.ports.out.AvailableSlotInstanceReposito
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
+import com.citasalud.agendamiento.domain.ports.in.GetAppointmentHistoryUseCase;
+import java.util.List;
 
 @Service
 public class AppointmentService
-        implements ScheduleAppointmentUseCase, ModifyAppointmentUseCase, CancelAppointmentUseCase {
+                implements ScheduleAppointmentUseCase, ModifyAppointmentUseCase, CancelAppointmentUseCase,
+                GetAppointmentHistoryUseCase {
 
-    private final AppointmentRepositoryPort appointmentRepositoryPort;
-    private final AvailableSlotInstanceRepositoryPort availableSlotInstanceRepositoryPort;
-    private final UserRepositoryPort userRepositoryPort;
+        private final AppointmentRepositoryPort appointmentRepositoryPort;
+        private final AvailableSlotInstanceRepositoryPort availableSlotInstanceRepositoryPort;
+        private final UserRepositoryPort userRepositoryPort;
 
-    public AppointmentService(AppointmentRepositoryPort appointmentRepositoryPort,
-            AvailableSlotInstanceRepositoryPort availableSlotInstanceRepositoryPort,
-            UserRepositoryPort userRepositoryPort) {
-        this.appointmentRepositoryPort = appointmentRepositoryPort;
-        this.availableSlotInstanceRepositoryPort = availableSlotInstanceRepositoryPort;
-        this.userRepositoryPort = userRepositoryPort;
-    }
-
-    @Override
-    @Transactional
-    public Appointment scheduleAppointment(UUID availableSlotInstanceId, UUID affiliateId) {
-        AvailableSlotInstance slot = availableSlotInstanceRepositoryPort.findById(availableSlotInstanceId)
-                .orElseThrow(() -> new SlotNotFoundException("El slot seleccionado no existe."));
-
-        if (!"available".equalsIgnoreCase(slot.getStatus())) {
-            throw new SlotNotAvailableException("Este slot ya no está disponible.");
+        public AppointmentService(AppointmentRepositoryPort appointmentRepositoryPort,
+                        AvailableSlotInstanceRepositoryPort availableSlotInstanceRepositoryPort,
+                        UserRepositoryPort userRepositoryPort) {
+                this.appointmentRepositoryPort = appointmentRepositoryPort;
+                this.availableSlotInstanceRepositoryPort = availableSlotInstanceRepositoryPort;
+                this.userRepositoryPort = userRepositoryPort;
         }
 
-        slot.setStatus("booked");
-        availableSlotInstanceRepositoryPort.save(slot);
+        @Override
+        @Transactional
+        public Appointment scheduleAppointment(UUID availableSlotInstanceId, UUID affiliateId) {
+                AvailableSlotInstance slot = availableSlotInstanceRepositoryPort.findById(availableSlotInstanceId)
+                                .orElseThrow(() -> new SlotNotFoundException("El slot seleccionado no existe."));
 
-        Appointment newAppointment = new Appointment(
-                slot.getProfessionalId(),
-                slot.getSiteId(),
-                affiliateId,
-                slot.getStartAt(),
-                slot.getEndAt(),
-                "scheduled",
-                slot.getId());
+                if (!"available".equalsIgnoreCase(slot.getStatus())) {
+                        throw new SlotNotAvailableException("Este slot ya no está disponible.");
+                }
 
-        return appointmentRepositoryPort.save(newAppointment);
-    }
+                slot.setStatus("booked");
+                availableSlotInstanceRepositoryPort.save(slot);
 
-    @Override
-    @Transactional
-    public Appointment modifyAppointment(UUID appointmentId, UUID newAvailableSlotInstanceId, String userEmail) {
-        User affiliate = userRepositoryPort.findByEmail(userEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + userEmail));
+                Appointment newAppointment = new Appointment(
+                                slot.getProfessionalId(),
+                                slot.getSiteId(),
+                                affiliateId,
+                                slot.getStartAt(),
+                                slot.getEndAt(),
+                                "scheduled",
+                                slot.getId());
 
-        Appointment appointment = appointmentRepositoryPort.findById(appointmentId)
-                .orElseThrow(() -> new AppointmentNotFoundException("La cita con ID " + appointmentId + " no existe."));
-
-        if (!appointment.getAffiliateId().equals(affiliate.getId())) {
-            throw new UnauthorizedAppointmentAccessException("No tiene permisos para modificar esta cita.");
+                return appointmentRepositoryPort.save(newAppointment);
         }
 
-        AvailableSlotInstance oldSlot = availableSlotInstanceRepositoryPort
-                .findById(appointment.getAvailableSlotInstanceId())
-                .orElseThrow(() -> new SlotNotFoundException("El slot antiguo de la cita no se encontró (ID: "
-                        + appointment.getAvailableSlotInstanceId() + "). Error de integridad de datos."));
+        @Override
+        @Transactional
+        public Appointment modifyAppointment(UUID appointmentId, UUID newAvailableSlotInstanceId, String userEmail) {
+                User affiliate = userRepositoryPort.findByEmail(userEmail)
+                                .orElseThrow(() -> new UsernameNotFoundException(
+                                                "Usuario no encontrado: " + userEmail));
 
-        AvailableSlotInstance newSlot = availableSlotInstanceRepositoryPort.findById(newAvailableSlotInstanceId)
-                .orElseThrow(() -> new SlotNotFoundException(
-                        "El nuevo slot seleccionado (ID: " + newAvailableSlotInstanceId + ") no existe."));
+                Appointment appointment = appointmentRepositoryPort.findById(appointmentId)
+                                .orElseThrow(() -> new AppointmentNotFoundException(
+                                                "La cita con ID " + appointmentId + " no existe."));
 
-        if (!"available".equalsIgnoreCase(newSlot.getStatus())) {
-            throw new SlotNotAvailableException("El nuevo slot seleccionado ya no está disponible.");
+                if (!appointment.getAffiliateId().equals(affiliate.getId())) {
+                        throw new UnauthorizedAppointmentAccessException("No tiene permisos para modificar esta cita.");
+                }
+
+                AvailableSlotInstance oldSlot = availableSlotInstanceRepositoryPort
+                                .findById(appointment.getAvailableSlotInstanceId())
+                                .orElseThrow(() -> new SlotNotFoundException(
+                                                "El slot antiguo de la cita no se encontró (ID: "
+                                                                + appointment.getAvailableSlotInstanceId()
+                                                                + "). Error de integridad de datos."));
+
+                AvailableSlotInstance newSlot = availableSlotInstanceRepositoryPort.findById(newAvailableSlotInstanceId)
+                                .orElseThrow(() -> new SlotNotFoundException(
+                                                "El nuevo slot seleccionado (ID: " + newAvailableSlotInstanceId
+                                                                + ") no existe."));
+
+                if (!"available".equalsIgnoreCase(newSlot.getStatus())) {
+                        throw new SlotNotAvailableException("El nuevo slot seleccionado ya no está disponible.");
+                }
+
+                oldSlot.setStatus("available");
+                newSlot.setStatus("booked");
+
+                appointment.setAvailableSlotInstanceId(newSlot.getId());
+                appointment.setStartAt(newSlot.getStartAt());
+                appointment.setEndAt(newSlot.getEndAt());
+                appointment.setProfessionalId(newSlot.getProfessionalId());
+                appointment.setSiteId(newSlot.getSiteId());
+
+                availableSlotInstanceRepositoryPort.save(oldSlot);
+                availableSlotInstanceRepositoryPort.save(newSlot);
+                return appointmentRepositoryPort.save(appointment);
         }
 
-        oldSlot.setStatus("available");
-        newSlot.setStatus("booked");
+        @Override
+        @Transactional
+        public Appointment cancelAppointment(UUID appointmentId, String userEmail, String reason) {
 
-        appointment.setAvailableSlotInstanceId(newSlot.getId());
-        appointment.setStartAt(newSlot.getStartAt());
-        appointment.setEndAt(newSlot.getEndAt());
-        appointment.setProfessionalId(newSlot.getProfessionalId());
-        appointment.setSiteId(newSlot.getSiteId());
+                User affiliate = userRepositoryPort.findByEmail(userEmail)
+                                .orElseThrow(() -> new UsernameNotFoundException(
+                                                "Usuario no encontrado: " + userEmail));
 
-        availableSlotInstanceRepositoryPort.save(oldSlot);
-        availableSlotInstanceRepositoryPort.save(newSlot);
-        return appointmentRepositoryPort.save(appointment);
-    }
+                Appointment appointment = appointmentRepositoryPort.findById(appointmentId)
+                                .orElseThrow(() -> new AppointmentNotFoundException(
+                                                "La cita con ID " + appointmentId + " no existe."));
 
-    @Override
-    @Transactional
-    public Appointment cancelAppointment(UUID appointmentId, String userEmail, String reason) {
+                if (!appointment.getAffiliateId().equals(affiliate.getId())) {
+                        throw new UnauthorizedAppointmentAccessException("No tiene permisos para cancelar esta cita.");
+                }
 
-        User affiliate = userRepositoryPort.findByEmail(userEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + userEmail));
+                if (!"scheduled".equalsIgnoreCase(appointment.getStatus())) {
+                        throw new CancellationNotAllowedException(
+                                        "No se puede cancelar una cita que no esté en estado 'scheduled'. Estado actual: "
+                                                        + appointment.getStatus());
+                }
 
-        Appointment appointment = appointmentRepositoryPort.findById(appointmentId)
-                .orElseThrow(() -> new AppointmentNotFoundException("La cita con ID " + appointmentId + " no existe."));
+                AvailableSlotInstance slot = availableSlotInstanceRepositoryPort
+                                .findById(appointment.getAvailableSlotInstanceId())
+                                .orElseThrow(() -> new SlotNotFoundException("El slot de la cita no se encontró (ID: "
+                                                + appointment.getAvailableSlotInstanceId()
+                                                + "). Error de integridad de datos."));
 
-        if (!appointment.getAffiliateId().equals(affiliate.getId())) {
-            throw new UnauthorizedAppointmentAccessException("No tiene permisos para cancelar esta cita.");
+                slot.setStatus("available");
+                appointment.setStatus("cancelled");
+
+                availableSlotInstanceRepositoryPort.save(slot);
+                return appointmentRepositoryPort.save(appointment);
         }
 
-        if (!"scheduled".equalsIgnoreCase(appointment.getStatus())) {
-            throw new CancellationNotAllowedException(
-                    "No se puede cancelar una cita que no esté en estado 'scheduled'. Estado actual: "
-                            + appointment.getStatus());
+        @Override
+        public List<Appointment> getAppointmentHistory(String userEmail) {
+                // Buscamos al usuario para obtener su UUID
+                User affiliate = userRepositoryPort.findByEmail(userEmail)
+                                .orElseThrow(() -> new UsernameNotFoundException(
+                                                "Usuario no encontrado: " + userEmail));
+
+                // Devolvemos todas sus citas
+                return appointmentRepositoryPort.findAllByAffiliateId(affiliate.getId());
         }
-
-        AvailableSlotInstance slot = availableSlotInstanceRepositoryPort
-                .findById(appointment.getAvailableSlotInstanceId())
-                .orElseThrow(() -> new SlotNotFoundException("El slot de la cita no se encontró (ID: "
-                        + appointment.getAvailableSlotInstanceId() + "). Error de integridad de datos."));
-
-        slot.setStatus("available");
-        appointment.setStatus("cancelled");
-
-        availableSlotInstanceRepositoryPort.save(slot);
-        return appointmentRepositoryPort.save(appointment);
-    }
 }
