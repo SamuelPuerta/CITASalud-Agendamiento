@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: citas-backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: citas-backend
+  template:
+    metadata:
+      labels:
+        app: citas-backend
+    spec:
+      containers:
+        - name: citas-backend
+          image: citas-backend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: SERVER_PORT
+
+            - name: MAIL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: MAIL_HOST
+
+            - name: MAIL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: MAIL_PORT
+
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: APP_ENV
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: DB_PASSWORD

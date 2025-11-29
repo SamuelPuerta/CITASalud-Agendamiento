@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  SERVER_PORT: "8080"
+  MAIL_HOST: "localhost"
+  MAIL_PORT: "1025"
+  APP_ENV: "dev"
+  DB_URL: "jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres?user=postgres.hjhtkloihczletmeywpt&password=${DB_PASSWORD}"
