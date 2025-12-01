@@ -1,7 +1,7 @@
 spring:
   datasource:
-    url: jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres?user=postgres.hjhtkloihczletmeywpt&password=${DB_PASSWORD}
-    username: postgres.hjhtkloihczletmeywpt
+    url: jdbc:postgresql://citas-postgres-service:5432/citasdb
+    username: postgres
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
